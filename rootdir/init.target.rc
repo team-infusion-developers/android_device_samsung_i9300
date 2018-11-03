@@ -1,5 +1,6 @@
 on init
     export LD_SHIM_LIBS /system/lib/libsec-ril.so|libsamsung_symbols.so
+    #export LD_SHIM_LIBS /system/lib/libsec-ril.so|libsamsung_symbols.so:/system/bin/installd|libselinux_shim.so:/system/bin/vold|libselinux_shim.so
 # ko files for FM Radio
     insmod /system/lib/modules/Si4709_driver.ko
     chown system system /sys/devices/system/cpu/cpufreq/pegasusq
@@ -99,7 +100,6 @@ service cpboot-daemon /system/bin/cbd -d
     class main
     user root
     group radio cache inet misc audio sdcard_rw log
-    seclabel u:r:cpboot-daemon:s0
 
 
 # Start GPS daemon
@@ -108,4 +108,3 @@ service gps-daemon /system/bin/sh /system/bin/gps_daemon.sh
     socket gps seqpacket 0660 gps system
     user gps
     group system inet sdcard_rw gps
-    seclabel u:r:glgps:s0
