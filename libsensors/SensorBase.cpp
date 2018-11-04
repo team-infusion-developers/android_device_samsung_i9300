@@ -81,6 +81,17 @@ int SensorBase::setDelay(int32_t handle, int64_t ns) {
     return 0;
 }
 
+int SensorBase::batch(int handle, int flags, int64_t period_ns, int64_t timeout)
+{
+    (void)flags;
+    (void)timeout;
+    return setDelay(handle, period_ns);
+}
+
+int SensorBase::flush(int handle)
+{
+    return 0;
+}
 bool SensorBase::hasPendingEvents() const {
     return false;
 }
@@ -130,16 +141,6 @@ int SensorBase::openInput(const char* inputName) {
     ALOGE_IF(fd<0, "couldn't find '%s' input device", inputName);
 
     return fd;
-}
-
-int SensorBase::batch(int handle, int flags, int64_t period_ns, int64_t timeout)
-{
-    return 0;
-}
-
-int SensorBase::flush(int handle)
-{
-    return 0;
 }
 
 int SensorBase::sspEnable(const char* sensorname, int sensorvalue, int en)
