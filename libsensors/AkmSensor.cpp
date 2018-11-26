@@ -32,6 +32,8 @@
 
 #define LOGTAG "AkmSensor"
 
+#define DEBUG 1
+
 //#define ALOG_NDEBUG 0
 
 /*****************************************************************************/
