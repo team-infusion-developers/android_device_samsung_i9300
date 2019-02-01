@@ -62,7 +62,6 @@
 #define SENSORS_PROXIMITY_HANDLE        4
 #define SENSORS_GYROSCOPE_HANDLE        5
 #define SENSORS_PRESSURE_HANDLE         6
-#define SENSORS_SIGNIFICANT_MOTION_HANDLE 7
 
 #define AKM_FTRACE 0
 #define AKM_DEBUG 0
@@ -104,11 +103,6 @@ static const struct sensor_t sSensorList[] = {
           1, SENSORS_LIGHT_HANDLE,
           SENSOR_TYPE_LIGHT, 121240.0f, 1.0f, 0.2f, 0, 0, 0,
           SENSOR_STRING_TYPE_LIGHT, "", 0, SENSOR_FLAG_ON_CHANGE_MODE, {0, 0} },
-        { "Significant motion sensor (Accelerometer)",
-          "STMicroelectronics",
-          1, SENSORS_SIGNIFICANT_MOTION_HANDLE,
-          SENSOR_TYPE_SIGNIFICANT_MOTION, 1.0f, 1.0f, 0.23f, 0, 0, 0,
-          "", "", 0, SENSOR_FLAG_WAKE_UP, {0, 0},},
 };
 
 
@@ -117,7 +111,7 @@ static int open_sensors(const struct hw_module_t* module, const char* id,
 
 
 static int sensors__get_sensors_list(struct sensors_module_t* module,
-                                     struct sensor_t const** list)
+                                     struct sensor_t const** list) 
 {
         *list = sSensorList;
         return ARRAY_SIZE(sSensorList);
@@ -149,19 +143,14 @@ struct sensors_poll_context_t {
     int setDelay(int handle, int64_t ns);
     int pollEvents(sensors_event_t* data, int count);
     int batch(int handle, int flags, int64_t period_ns, int64_t timeout);
-
-    // return true if the constructor is completed
-    bool isValid() { return mInitialized; };
     int flush(int handle);
-
 private:
     enum {
         light           = 0,
         proximity       = 1,
         akm             = 2,
         gyro            = 3,
-        accel           = 4,
-        pressure        = 5,
+        pressure        = 4,
         numSensorDrivers,
         numFds,
     };
@@ -171,16 +160,12 @@ private:
     struct pollfd mPollFds[numFds];
     int mWritePipeFd;
     SensorBase* mSensors[numSensorDrivers];
-    // return true if the constructor is completed
-    bool mInitialized;
 
     int handleToDriver(int handle) const {
-      switch (handle) {
+        switch (handle) {
             case ID_A:
-                return accel;
             case ID_M:
             case ID_O:
-            case ID_SM:
                 return akm;
             case ID_P:
                 return proximity;
@@ -219,11 +204,6 @@ sensors_poll_context_t::sensors_poll_context_t()
     mPollFds[gyro].events = POLLIN;
     mPollFds[gyro].revents = 0;
 
-    mSensors[accel] = new AccelSensor();
-    mPollFds[accel].fd = mSensors[accel]->getFd();
-    mPollFds[accel].events = POLLIN;
-    mPollFds[accel].revents = 0;
-
     mSensors[pressure] = new PressureSensor();
     mPollFds[pressure].fd = mSensors[pressure]->getFd();
     mPollFds[pressure].events = POLLIN;
@@ -239,7 +219,6 @@ sensors_poll_context_t::sensors_poll_context_t()
     mPollFds[wake].fd = wakeFds[0];
     mPollFds[wake].events = POLLIN;
     mPollFds[wake].revents = 0;
-    mInitialized = true;
 }
 
 sensors_poll_context_t::~sensors_poll_context_t() {
@@ -248,14 +227,14 @@ sensors_poll_context_t::~sensors_poll_context_t() {
     }
     close(mPollFds[wake].fd);
     close(mWritePipeFd);
-    mInitialized = false;
 }
 
 int sensors_poll_context_t::activate(int handle, int enabled) {
-    if (!mInitialized) return -EINVAL;
     int index = handleToDriver(handle);
-    //ALOGI("Sensors: handle: %i", handle);
     if (index < 0) return index;
+    if (index == gyro && enabled == 0) {
+        usleep(200*1000);
+    }
     int err =  mSensors[index]->enable(handle, enabled);
     if (enabled && !err) {
         const char wakeMessage(WAKE_MESSAGE);
@@ -342,21 +321,19 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
 
     return nbEvents;
 }
-
-int sensors_poll_context_t::batch(int handle, int flags, int64_t period_ns, int64_t timeout)
-{
+int sensors_poll_context_t::batch(int handle, int flags, int64_t period_ns, int64_t timeout) {
     int index = handleToDriver(handle);
     if (index < 0) return index;
+
     return mSensors[index]->batch(handle, flags, period_ns, timeout);
 }
 
-int sensors_poll_context_t::flush(int handle)
-{
+int sensors_poll_context_t::flush(int handle) {
     int index = handleToDriver(handle);
     if (index < 0) return index;
+
     return mSensors[index]->flush(handle);
 }
-
 /*****************************************************************************/
 
 static int device__close(struct hw_device_t *dev)
@@ -386,17 +363,14 @@ static int device__poll(sensors_poll_device_t *dev,
     return ctx->pollEvents(data, count);
 }
 
-static int device__batch(struct sensors_poll_device_1 *dev,
-                      int handle, int flags, int64_t period_ns, int64_t timeout)
-{
-    sensors_poll_context_t *ctx = (sensors_poll_context_t *)dev;
+static int device__batch(struct sensors_poll_device_1 *dev, int handle,
+        int flags, int64_t period_ns, int64_t timeout) {
+    sensors_poll_context_t* ctx = (sensors_poll_context_t*) dev;
     return ctx->batch(handle, flags, period_ns, timeout);
 }
 
-static int device__flush(struct sensors_poll_device_1 *dev,
-                      int handle)
-{
-    sensors_poll_context_t *ctx = (sensors_poll_context_t *)dev;
+static int device__flush(struct sensors_poll_device_1 *dev, int handle) {
+    sensors_poll_context_t* ctx = (sensors_poll_context_t*) dev;
     return ctx->flush(handle);
 }
 
