@@ -17,10 +17,11 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+#	orientation.c \
+
 LOCAL_SRC_FILES := \
 	smdk4x12_sensors.c \
 	input.c \
-	orientation.c \
 	akm8975.c \
 	akmdfs/AKFS_APIs_8975/AKFS_AK8975.c \
 	akmdfs/AKFS_APIs_8975/AKFS_AOC.c \

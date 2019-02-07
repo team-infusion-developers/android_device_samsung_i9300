@@ -339,15 +339,14 @@ int lsm330dlc_acceleration_get_data(struct smdk4x12_sensors_handlers *handlers,
 	struct input_event input_event;
 	int input_fd;
 	int rc;
+        int sensorId = SENSOR_TYPE_ACCELEROMETER;
 
 //	ALOGD("%s(%p, %p)", __func__, handlers, event);
 
 	if (handlers == NULL || handlers->data == NULL || event == NULL)
 		return -EINVAL;
 
-        //int numEventReceived = 0;
-        int sensorId = SENSOR_TYPE_ACCELEROMETER;
-        while (mFlushed) {
+        //while (mFlushed) {
             if (mFlushed & (1 << sensorId)) { /* Send flush META_DATA_FLUSH_COMPLETE immediately */
                 sensors_event_t sensor_event;
                 memset(&sensor_event, 0, sizeof(sensor_event));
@@ -356,12 +355,10 @@ int lsm330dlc_acceleration_get_data(struct smdk4x12_sensors_handlers *handlers,
                 sensor_event.meta_data.sensor = sensorId;
                 sensor_event.meta_data.what = 0;
                 *event++ = sensor_event;
-                //numEventReceived++;
                 mFlushed &= ~(0x01 << sensorId);
                 ALOGD("AkmSensor: %s Flushed sensorId: %d", __func__, sensorId);
             }
-            sensorId++;
-        }
+        //}
 
 	data = (struct lsm330dlc_acceleration_data *) handlers->data;
 
@@ -401,8 +398,8 @@ int lsm330dlc_acceleration_get_data(struct smdk4x12_sensors_handlers *handlers,
 		}
 	} while (input_event.type != EV_SYN);
 
-	if (data->orientation_sensor != NULL)
-		orientation_fill(data->orientation_sensor, &event->acceleration, NULL);
+	//if (data->orientation_sensor != NULL)
+	//	orientation_fill(data->orientation_sensor, &event->acceleration, NULL);
 
 	return 0;
 }

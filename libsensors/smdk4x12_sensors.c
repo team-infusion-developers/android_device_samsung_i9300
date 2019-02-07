@@ -76,7 +76,7 @@ int smdk4x12_sensors_count = sizeof(smdk4x12_sensors) / sizeof(struct sensor_t);
 struct smdk4x12_sensors_handlers *smdk4x12_sensors_handlers[] = {
 	&lsm330dlc_acceleration,
 	&akm8975,
-	&orientation,
+	//&orientation,
 	&cm36651_proximity,
 	&cm36651_light,
 	&lsm330dlc_gyroscope,
