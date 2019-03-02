@@ -12,6 +12,9 @@ ro.sf.lcd_density=320
 ro.lcd_min_brightness=20
 ro.ril.telephony.nstrings=4
 
+# EGL blobs crash on screen off
+ro.egl.destroy_after_detach=true
+
 # RAM optimizations
 #persist.sys.ram_minfree=138240
 config.disable_atlas=true
