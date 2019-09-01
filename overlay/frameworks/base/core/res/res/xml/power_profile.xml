@@ -39,18 +39,13 @@
       <value>3.4</value>
       <value>3.4</value>
   </array>
-  <!-- Different CPU speeds as reported in
-       /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state -->
   <array name="cpu.speeds">
-      <value>200000</value>
-      <value>500000</value>
-      <value>800000</value>
-      <value>1000000</value>
-      <value>1200000</value>
-      <value>1400000</value>
-      <value>1600000</value>
-      <value>1800000</value>
-  </array>
+    <value>12000000</value>
+    <value>10000000</value>
+    <value>800000</value>
+    <value>500000</value>
+    <value>200000</value>
+    </array>
   <!-- Power consumption when CPU is idle -->
   <item name="cpu.idle">1.4</item>
   <!-- Power consumption due to wake lock held -->
@@ -64,7 +59,6 @@
       <value>170.0</value>
       <value>200.0</value>
       <value>230.0</value>
-      <value>260.0</value>
   </array>
   <!-- This is the battery capacity in mAh -->
   <item name="battery.capacity">2100</item>
